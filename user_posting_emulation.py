@@ -6,11 +6,20 @@ import boto3
 import json
 import sqlalchemy
 from sqlalchemy import text
-import requests
-import json
+import datetime
+from json import JSONEncoder
+
+
 
 
 random.seed(100)
+
+# subclass JSONEncoder
+class DateTimeEncoder(JSONEncoder):
+        #Override the default method
+        def default(self, obj):
+            if isinstance(obj, (datetime.date, datetime.datetime)):
+                return obj.isoformat()
 
 
 class AWSDBConnector:
@@ -38,7 +47,7 @@ def run_infinite_post_data_loop():
         engine = new_connector.create_db_connector()
 
         with engine.connect() as connection:
-
+            #Extract pin data
             pin_string = text(f"SELECT * FROM pinterest_data LIMIT {random_row}, 1")
             pin_selected_row = connection.execute(pin_string)
             
@@ -46,28 +55,40 @@ def run_infinite_post_data_loop():
                 pin_result = dict(row._mapping)
                 invoke_url = "https://y6zlosa988.execute-api.us-east-1.amazonaws.com/dev/topics/12d6e5017cf5.pin"
                 #Send JSON data to Kafka
-                payload = json.dumps(pin_result)
-                headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+                payload = json.dumps(pin_result, ensure_ascii=False).encode('utf8')
+                headers = {'Content-Type': 'application/vnd.kafka.json.v/2+json'}
                 response_pin = requests.request("POST", invoke_url, headers=headers, data=payload)
-
+            
+            #Extract geolocation data of each pin
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
             
             for row in geo_selected_row:
                 geo_result = dict(row._mapping)
+                invoke_url = "https://y6zlosa988.execute-api.us-east-1.amazonaws.com/dev/topics/12d6e5017cf5.geo"                
+                #Send JSON data to Kafka
+                payload = json.dumps(geo_result, cls=DateTimeEncoder, ensure_ascii=False).encode('utf8')
+                headers = {'Content-Type': 'application/vnd.kafka.json.v⁄2+json'}
+                response_geo = requests.request("POST", invoke_url, headers=headers, data=payload)
 
-            user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
-            user_selected_row = connection.execute(user_string)
+            #Extract user data for each pin
+#            user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
+#            user_selected_row = connection.execute(user_string)
             
-            for row in user_selected_row:
-                user_result = dict(row._mapping)
-            
+#            for row in user_selected_row:
+#                user_result = dict(row._mapping)
+#                invoke_url = "https://y6zlosa988.execute-api.us-east-1.amazonaws.com/dev/topics/12d6e5017cf5.user"                
+                #Send JSON data to Kafka
+#                payload = json.dumps(user_result, cls=DateTimeEncoder)
+#                headers = {'Content-Type': 'application/vnd.kafka.json.v⁄2+json'}
+#                response_user = requests.request("POST", invoke_url, headers=headers, data=payload)
+
             print(pin_result)
             print(response_pin)
-            #print(geo_result)
-            #print(user_result)
-            #print(response_geo)
-            #print(response_user)
+            print(geo_result)
+            print(response_geo)
+#            print(user_result)
+#            print(response_user)
 
 
 
