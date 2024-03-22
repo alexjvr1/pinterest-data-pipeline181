@@ -2,12 +2,12 @@
 
 ## Project Description
 
-Aim: Set up a single SQL database of all sales data for Multinational Retail Co. 
+Aim: Extract, transform and load data from pinterest using batch processing (AWS MWAA) and streaming (Kinesis)
 
-This is a pipeline to collate and clean data pertaining to the running of a company. Data are extracted from different sources (AWS database, AWS s3 bucket, and API). The data are uploaded to an SQL database. The code for this part of the project is all written in python. 
+This pipeline extracts data in batches from an RDS database using Kafka. These data are stored in an AWS S3 bucket. 
+The data are then transformed in Databricks, and a batch processing pipeline is set up in AWS MWAA to manage a scheduled (daily) triggering of the pipeline. The final tables are queried for various questions of interest to the business. 
 
-Next, the database is curated and a star-based database schema is created. Finally, the database is queried to determine various interesting things about the running of the business. The code for this part of the project is written in postgresql. 
-
+A second pipeline is created as a streaming alternative to the batch processing above. Here data are retrieved from the RDS database and sent to Kinesis streams. The data are then imported to Databricks to be transformed and cleaned, and saved as delta tables to be queried. 
 
 ## Quick start
 
@@ -34,21 +34,15 @@ yaml               6.0.1
 
 ## Usage instructions
 
-The src/ directory contains all the scripts. The step by step pipeline is documented in __main__.py, and the SQL database setup and queries are documented in sales_data_queries.sql. Run these script to duplicate the steps used in this project:
+The src/ directory contains all the scripts. The step by step pipeline is documented in __main__.py.
 
 ```
 python __main__.py
 ```
 
-__main__.py: Data extraction and processing pipeline
+# Data processing and querying in Databricks
 
-database_utils.py: modules to connect with and upload data to a database 
 
-data_cleaning.py: modules to clean each dataset
-
-data_extraction.py: modules to download data from the various sources. 
-
-sales_data_queries.sql: SQL database setup and data queries. 
 
 
 
