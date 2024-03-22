@@ -40,7 +40,11 @@ The src/ directory contains all the scripts. The step by step pipeline is docume
 python __main__.py
 ```
 
-# Data processing and querying in Databricks
+## Data processing and querying in Databricks is shown in two iPython Notebooks: 
+
+Pinterest_Data_Processing_Batch_Data.ipynb: Batch processing, transforming, and querying the data
+
+Pinterest_Data_Processing_Streaming_Data.ipynb: Streaming and transforming the data, and saving the output as Delta tables
 
 
 
