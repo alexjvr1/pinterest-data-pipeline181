@@ -10,8 +10,6 @@ import datetime
 from json import JSONEncoder
 
 
-
-
 random.seed(100)
 
 # subclass JSONEncoder
@@ -55,10 +53,11 @@ def run_infinite_post_data_loop():
                 pin_result = dict(row._mapping)
                 invoke_url = "https://y6zlosa988.execute-api.us-east-1.amazonaws.com/dev/topics/12d6e5017cf5.pin"
                 #Send JSON data to Kafka
-                payload = json.dumps({"records": [{"value": pin_result}]}, cls=DateTimeEncoder)
+                pin_payload = json.dumps({"records": [{"value": pin_result}]}, cls=DateTimeEncoder)
                 headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
-                response_pin = requests.request("POST", invoke_url, headers=headers, data=payload)
-            
+                post_response_pin = requests.request("POST", invoke_url, headers=headers, data=pin_payload)
+
+
             #Extract geolocation data of each pin
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
@@ -70,6 +69,7 @@ def run_infinite_post_data_loop():
                 payload = json.dumps({"records": [{"value": geo_result}]}, cls=DateTimeEncoder)
                 headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
                 response_geo = requests.request("POST", invoke_url, headers=headers, data=payload)
+
 
             #Extract user data for each pin
             user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
@@ -83,12 +83,13 @@ def run_infinite_post_data_loop():
                 headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
                 response_user = requests.request("POST", invoke_url, headers=headers, data=payload)
 
-            print(pin_result)
-            print("pin response:",response_pin)
-            print(geo_result)
-            print("geo response:",response_geo)
-            print(user_result)
-            print("user response:",response_user)
+            pin_results = print(pin_result)
+            print("pin response:",post_response_pin)
+            #print(pin_response.status_code)
+            #print(geo_result)
+            #print("geo response:",response_geo)
+            #print(user_result)
+            #print("user response:",response_user)
 
 
 
